@@ -6,7 +6,7 @@ extern crate reqwest;
 extern crate num;
 
 use std::str::FromStr;
-
+use chrono::prelude::*;
 
 type Error = Box<dyn std::error::Error>;
 type Result<T, E = Error> = std::result::Result<T, E>;
@@ -121,6 +121,34 @@ async fn getinfo() -> Result<()> {
     Ok(())
 }
 
+fn get_hour() -> usize {
+    let current_hour: DateTime<Local> = Local::now();
+    current_hour.hour() as usize
+}
+
+fn check_status(url: &str) -> bool {
+    use std::process::Command;
+    let status = Command::new("ping")
+        .arg(url)
+        .output()
+        .expect("启动进程失败");
+    status.status.success()
+}
+
+async fn auto_login(username: &str, userpasswd: &str) -> Result<()> {
+    use std::{thread::sleep, time};
+    let delay = time::Duration::from_secs(300);
+    loop {
+        let current_hour = get_hour();
+        if current_hour >= 2 && current_hour < 4 {
+            if !check_status("www.baidu.com") {
+                login(username, userpasswd).await?;
+            }
+        }
+        sleep(delay);
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     use std::env;
@@ -132,6 +160,7 @@ async fn main() -> Result<()> {
         println!("  login <用户名> <用户密码> - 登录");
         println!("  logout <用户名> <用户密码> - 注销");
         println!("  info - 显示在线账户信息");
+        println!("  autologin - 自动登录进程");
     };
 
     if args.len() < 2 {
@@ -150,9 +179,12 @@ async fn main() -> Result<()> {
         }
     } else if args[1] == "info" {
         getinfo().await?;
+    } else if args[1] == "autologin" {
+        auto_login(&args[2], &args[3]).await?;
     } else {
         showhelp();
     }
+
 
     Ok(())
 }
