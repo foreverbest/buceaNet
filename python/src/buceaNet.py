@@ -321,6 +321,24 @@ def help_menu():
     print("logout <学号> <密码>  - 注销")
     print("info                - 查看在线状态")
 
+def auto_login(begin_time: int, end_time: int, username: str, passwd: str):
+    from os import system
+    from time import sleep, localtime
+    busy_delay = 300
+    free_delay = 3600
+    while True:
+        current_time = localtime()[3]
+        if begin_time <= current_time < end_time:
+            if system("ping www.baidu.com>nul"):
+                init_work()
+                login()
+            sleep(busy_delay)
+        else:
+            if system("ping www.baidu.com>nul"):
+                init_work()
+                login()
+            sleep(free_delay)
+
 if __name__ == '__main__':
     global username, password
     global DEBUG_MODE, SHOW_IP, SHOW_TOKEN, SHOW_SRUN_PORTAL_INFO, SHOW_USER_INFO
@@ -363,6 +381,11 @@ if __name__ == '__main__':
 
         elif argv[1] == 'logout':
             logout()
+        
+        elif argv[1] == 'autologin':
+            auto_login(2, 4, username, password)
 
     else:
         help_menu()
+  
+#auto_login(2, 4, username, password)
