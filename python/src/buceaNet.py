@@ -238,9 +238,9 @@ def login():
             print(srun_portal_res.text)
     if (re.search("E0000", srun_portal_res.text)):
         print("登录成功")
-    if (re.search("E2531", srun_portal_res.text)):
+    elif (re.search("E2531", srun_portal_res.text)):
         print("用户不存在")
-    if (re.search("E2553", srun_portal_res.text)):
+    elif (re.search("E2553", srun_portal_res.text)):
         print("账号或密码错误")
     elif (re.search("ip_already_online_error", srun_portal_res.text)):
         print("已经是在线状态，当前设备IP地址：{}".format(ip))
@@ -324,17 +324,18 @@ def help_menu():
 def auto_login(begin_time: int, end_time: int, username: str, passwd: str):
     from os import system
     from time import sleep, localtime
+    ckcode = system("ping -c 1 www.baidu.com>nul")
     busy_delay = 300
     free_delay = 3600
     while True:
         current_time = localtime()[3]
         if begin_time <= current_time < end_time:
-            if system("ping www.baidu.com>nul"):
+            if ckcode:
                 init_work()
                 login()
             sleep(busy_delay)
         else:
-            if system("ping www.baidu.com>nul"):
+            if ckcode:
                 init_work()
                 login()
             sleep(free_delay)
